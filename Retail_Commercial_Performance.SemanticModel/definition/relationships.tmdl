@@ -1,0 +1,12 @@
+relationship AutoDetected_c7f19058-36d1-4195-a9d4-d6679cbd5cbb
+	fromColumn: a_FactSalesDaily_portfolio.LocationID
+	toColumn: a_DimLocation_portfolio.LocationID
+
+relationship AutoDetected_8e739343-fadf-4d7b-b393-5aa77ddedea1
+	fromColumn: a_FactSalesDaily_portfolio.ProductID
+	toColumn: a_DimProduct_portfolio.ProductID
+
+relationship b572bf11-1e19-0176-878d-2387cc7bac8d
+	fromColumn: a_FactSalesDaily_portfolio.Date
+	toColumn: a_DimDate_portfolio.Date
+

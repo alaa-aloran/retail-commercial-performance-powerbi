@@ -1,0 +1,42 @@
+table a_DimProduct_portfolio
+	lineageTag: f7472d88-81ed-41c0-9057-5a672f3c1145
+
+	column ProductID
+		dataType: string
+		lineageTag: ecd87b4c-9514-4e6c-9aa6-004a4112883f
+		summarizeBy: none
+		sourceColumn: ProductID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		lineageTag: 047c79d1-7797-4f3a-af60-67c8b30436e0
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 6119dba6-15f9-49a2-8992-8c50a352c71e
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition a_DimProduct_portfolio = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/alaa-aloran/retail-commercial-performance-powerbi/main/sales_data/a_DimProduct_portfolio.csv"),[Delimiter=",", Columns=3, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}}),
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProductID", type text}, {"Product", type text}, {"Category", type text}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

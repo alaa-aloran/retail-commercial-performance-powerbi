@@ -1,0 +1,22 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["a_FactSalesDaily_portfolio","a_DimProduct_portfolio","a_DimLocation_portfolio","a_DimDate_portfolio","_Measures"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table a_FactSalesDaily_portfolio
+ref table a_DimProduct_portfolio
+ref table a_DimLocation_portfolio
+ref table a_DimDate_portfolio
+ref table _Measures
+
+ref cultureInfo en-US
+

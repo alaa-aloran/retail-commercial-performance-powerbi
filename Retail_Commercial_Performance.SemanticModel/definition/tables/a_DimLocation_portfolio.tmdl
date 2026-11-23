@@ -1,0 +1,77 @@
+table a_DimLocation_portfolio
+	lineageTag: aa2af644-74b8-4516-aadb-18e296663787
+
+	column LocationID
+		dataType: string
+		lineageTag: 7da2b029-a85f-4ec9-a4e1-f8c0c8b1e9b1
+		summarizeBy: none
+		sourceColumn: LocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 75539ffa-b1fc-4625-978d-796265ea91a2
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column StateProvince
+		dataType: string
+		lineageTag: 4d35dcae-0c15-4054-aa23-4429bdd78633
+		summarizeBy: none
+		sourceColumn: StateProvince
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: d5cc9ac4-f69b-44e9-8b64-3eb3005925da
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column MarketType
+		dataType: string
+		lineageTag: 2e0aad78-12bc-4f89-a63d-f3c689b0268d
+		summarizeBy: none
+		sourceColumn: MarketType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Latitude
+		dataType: double
+		lineageTag: d27e0bc4-38e7-4004-9c47-bb9df33af100
+		summarizeBy: none
+		sourceColumn: Latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Longitude
+		dataType: double
+		lineageTag: 7ddd3fdc-cf5a-4b72-967e-2841e01e156e
+		summarizeBy: none
+		sourceColumn: Longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition a_DimLocation_portfolio = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/alaa-aloran/retail-commercial-performance-powerbi/main/sales_data/a_DimLocation_portfolio.csv"),[Delimiter=",", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"LocationID", type text}, {"City", type text}, {"StateProvince", type text}, {"Country", type text}, {"MarketType", type text}, {"Latitude", type number}, {"Longitude", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

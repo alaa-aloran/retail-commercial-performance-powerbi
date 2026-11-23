@@ -1,0 +1,974 @@
+table _Measures
+	lineageTag: 23148f10-326b-4e8c-8743-137fa50c739f
+
+	measure 'Total Revenue' = SUM ( 'a_FactSalesDaily_portfolio'[Revenue_USD] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Core Financials
+		lineageTag: acdf2dbe-fdab-452c-8a94-dbbedd2fed61
+
+	measure 'Total Cost' = SUM ( 'a_FactSalesDaily_portfolio'[Cost_USD] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Core Financials
+		lineageTag: c5cc7de3-b324-49f3-9a93-def0130e96dc
+
+	/// Sum of the source's recorded profit in USD.
+	measure 'Total Profit' = SUM ( 'a_FactSalesDaily_portfolio'[Profit_USD] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Core Financials
+		lineageTag: 8ddc34dc-5448-4cf8-9a54-c133a141ab0c
+
+	measure 'Profit Margin %' = DIVIDE ( [Total Profit], [Total Revenue] )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Core Financials
+		lineageTag: 5f3b4eac-4859-4ef5-a347-1148769333ea
+
+	measure 'Units Sold' = SUM ( 'a_FactSalesDaily_portfolio'[UnitsSold] )
+		formatString: #,0
+		displayFolder: Core Financials
+		lineageTag: 2f16a3d8-fe35-4b62-9933-45accbe09766
+
+	measure 'Revenue per Unit' = DIVIDE ( [Total Revenue], [Units Sold] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Core Financials
+		lineageTag: cb9bf307-15b5-4b65-a66e-58b69f1be3f1
+
+	/// Compares the selected calendar dates with the prior year, aligning month ends when February differs.
+	measure 'Revenue Previous Year' =
+			VAR SelectedDates = VALUES ( 'a_DimDate_portfolio'[Date] )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			VAR FirstSelectedDate = MIN ( 'a_DimDate_portfolio'[Date] )
+			VAR FirstComparisonDate =
+			    IF ( NOT ISBLANK ( FirstSelectedDate ), EDATE ( FirstSelectedDate, -12 ) )
+			VAR ComparisonDates =
+			    FILTER (
+			        ALL ( 'a_DimDate_portfolio' ),
+			        VAR ComparisonDate = 'a_DimDate_portfolio'[Date]
+			        VAR ShiftedDate = EDATE ( ComparisonDate, 12 )
+			        RETURN
+			            ShiftedDate IN SelectedDates
+			                || (
+			                    ComparisonDate = EOMONTH ( ComparisonDate, 0 )
+			                        && EOMONTH ( ShiftedDate, 0 ) IN SelectedDates
+			                )
+			    )
+			RETURN
+			    IF (
+			        FirstComparisonDate >= CalendarStart,
+			        CALCULATE ( [Total Revenue], ComparisonDates )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Growth
+		lineageTag: febb58dd-ec92-4d8d-834e-febbcbd0c1e8
+
+	measure 'Revenue YoY %' =
+			VAR CurrentValue = [Total Revenue]
+			VAR PriorValue = [Revenue Previous Year]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentValue ) && NOT ISBLANK ( PriorValue ),
+			        DIVIDE ( CurrentValue - PriorValue, PriorValue )
+			    )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Growth
+		lineageTag: cc28e2bc-b420-4775-8082-e33b3a0ebbad
+
+	/// Compares the selected calendar dates with the prior year, aligning month ends when February differs.
+	measure 'Profit Previous Year' =
+			VAR SelectedDates = VALUES ( 'a_DimDate_portfolio'[Date] )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			VAR FirstSelectedDate = MIN ( 'a_DimDate_portfolio'[Date] )
+			VAR FirstComparisonDate =
+			    IF ( NOT ISBLANK ( FirstSelectedDate ), EDATE ( FirstSelectedDate, -12 ) )
+			VAR ComparisonDates =
+			    FILTER (
+			        ALL ( 'a_DimDate_portfolio' ),
+			        VAR ComparisonDate = 'a_DimDate_portfolio'[Date]
+			        VAR ShiftedDate = EDATE ( ComparisonDate, 12 )
+			        RETURN
+			            ShiftedDate IN SelectedDates
+			                || (
+			                    ComparisonDate = EOMONTH ( ComparisonDate, 0 )
+			                        && EOMONTH ( ShiftedDate, 0 ) IN SelectedDates
+			                )
+			    )
+			RETURN
+			    IF (
+			        FirstComparisonDate >= CalendarStart,
+			        CALCULATE ( [Total Profit], ComparisonDates )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Growth
+		lineageTag: a82a9683-e5dc-4898-9c73-47abe28ca814
+
+	/// Change divided by the absolute prior-year profit so improvements from a loss have a positive sign.
+	measure 'Profit YoY %' =
+			VAR CurrentValue = [Total Profit]
+			VAR PriorValue = [Profit Previous Year]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentValue ) && NOT ISBLANK ( PriorValue ),
+			        DIVIDE ( CurrentValue - PriorValue, ABS ( PriorValue ) )
+			    )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Growth
+		lineageTag: 605b8c22-78c9-4b28-8a37-5c2a50f80536
+
+	/// Compares the selected calendar dates with the prior year, aligning month ends when February differs.
+	measure 'Units Previous Year' =
+			VAR SelectedDates = VALUES ( 'a_DimDate_portfolio'[Date] )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			VAR FirstSelectedDate = MIN ( 'a_DimDate_portfolio'[Date] )
+			VAR FirstComparisonDate =
+			    IF ( NOT ISBLANK ( FirstSelectedDate ), EDATE ( FirstSelectedDate, -12 ) )
+			VAR ComparisonDates =
+			    FILTER (
+			        ALL ( 'a_DimDate_portfolio' ),
+			        VAR ComparisonDate = 'a_DimDate_portfolio'[Date]
+			        VAR ShiftedDate = EDATE ( ComparisonDate, 12 )
+			        RETURN
+			            ShiftedDate IN SelectedDates
+			                || (
+			                    ComparisonDate = EOMONTH ( ComparisonDate, 0 )
+			                        && EOMONTH ( ShiftedDate, 0 ) IN SelectedDates
+			                )
+			    )
+			RETURN
+			    IF (
+			        FirstComparisonDate >= CalendarStart,
+			        CALCULATE ( [Units Sold], ComparisonDates )
+			    )
+		formatString: #,0
+		displayFolder: Growth
+		lineageTag: 604eaa07-c388-4470-b88a-9212bbecce54
+
+	measure 'Units YoY %' =
+			VAR CurrentValue = [Units Sold]
+			VAR PriorValue = [Units Previous Year]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentValue ) && NOT ISBLANK ( PriorValue ),
+			        DIVIDE ( CurrentValue - PriorValue, PriorValue )
+			    )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Growth
+		lineageTag: 3756e450-a289-4596-94b0-341786be928f
+
+	measure 'Profit Margin Previous Year' = DIVIDE ( [Profit Previous Year], [Revenue Previous Year] )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Growth
+		lineageTag: 48dcaefd-eb5b-477b-89a5-b3ef875937c1
+
+	/// Difference between current and prior-year margins in percentage points.
+	measure 'Margin Change (pp)' =
+			VAR CurrentMargin = [Profit Margin %]
+			VAR PriorMargin = [Profit Margin Previous Year]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentMargin ) && NOT ISBLANK ( PriorMargin ),
+			        ( CurrentMargin - PriorMargin ) * 100
+			    )
+		formatString: 0.00" pp";-0.00" pp";0.00" pp"
+		displayFolder: Growth
+		lineageTag: 092b5e84-b0a1-4043-8ec2-a5a9632f10bc
+
+	/// Share of selected peers at product, category, or channel scope, in that priority. Other filters remain in effect.
+	measure 'Revenue Share %' =
+			VAR GroupTotal =
+			    SWITCH (
+			        TRUE (),
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Product] ) || ISINSCOPE ( 'a_DimProduct_portfolio'[ProductID] ),
+			            CALCULATE ( [Total Revenue], ALLSELECTED ( 'a_DimProduct_portfolio'[Product], 'a_DimProduct_portfolio'[ProductID] ) ),
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Category] ),
+			            CALCULATE ( [Total Revenue], ALLSELECTED ( 'a_DimProduct_portfolio'[Category] ) ),
+			        ISINSCOPE ( 'a_FactSalesDaily_portfolio'[Channel] ),
+			            CALCULATE ( [Total Revenue], ALLSELECTED ( 'a_FactSalesDaily_portfolio'[Channel] ) ),
+			        [Total Revenue]
+			    )
+			RETURN
+			    DIVIDE ( [Total Revenue], GroupTotal )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Commercial Performance
+		lineageTag: b7340991-be97-4cb3-bf28-d97f8801a97f
+
+	/// Share of selected peers at product, category, or channel scope, in that priority. Other filters remain in effect. Uses signed profit, so losses can yield negative shares.
+	measure 'Profit Share %' =
+			VAR GroupTotal =
+			    SWITCH (
+			        TRUE (),
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Product] ) || ISINSCOPE ( 'a_DimProduct_portfolio'[ProductID] ),
+			            CALCULATE ( [Total Profit], ALLSELECTED ( 'a_DimProduct_portfolio'[Product], 'a_DimProduct_portfolio'[ProductID] ) ),
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Category] ),
+			            CALCULATE ( [Total Profit], ALLSELECTED ( 'a_DimProduct_portfolio'[Category] ) ),
+			        ISINSCOPE ( 'a_FactSalesDaily_portfolio'[Channel] ),
+			            CALCULATE ( [Total Profit], ALLSELECTED ( 'a_FactSalesDaily_portfolio'[Channel] ) ),
+			        [Total Profit]
+			    )
+			RETURN
+			    DIVIDE ( [Total Profit], GroupTotal )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Commercial Performance
+		lineageTag: c8790a1b-763e-4772-8343-3d1504140eef
+
+	/// Ranks selected products with sales in the current context by revenue rounded to cents. Ties share a dense rank.
+	measure 'Product Revenue Rank' =
+			VAR ProductRevenue = [Total Revenue]
+			VAR AtProduct = ISINSCOPE ( 'a_DimProduct_portfolio'[Product] ) || ISINSCOPE ( 'a_DimProduct_portfolio'[ProductID] )
+			RETURN
+			    IF (
+			        AtProduct && NOT ISBLANK ( ProductRevenue ),
+			        VAR SelectedProductsWithRevenue =
+			            FILTER (
+			                ALLSELECTED ( 'a_DimProduct_portfolio'[Product], 'a_DimProduct_portfolio'[ProductID] ),
+			                NOT ISBLANK ( [Total Revenue] )
+			            )
+			        RETURN
+			            RANKX (
+			                SelectedProductsWithRevenue,
+			                ROUND ( [Total Revenue], 2 ),
+			                ROUND ( ProductRevenue, 2 ),
+			                DESC,
+			                DENSE
+			            )
+			    )
+		formatString: #,0
+		displayFolder: Commercial Performance
+		lineageTag: 44ce55c2-06f0-41f2-b582-67f4b87707a7
+
+	measure 'Return Units' = SUM ( 'a_FactSalesDaily_portfolio'[ReturnUnits] )
+		formatString: #,0
+		displayFolder: Commercial Performance
+		lineageTag: 324b7ba8-5dce-4444-a102-3972b8bde12f
+
+	/// Reported return units divided by sold units in the same filter context.
+	measure 'Return Rate %' = DIVIDE ( [Return Units], [Units Sold] )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Commercial Performance
+		lineageTag: 8725fcfe-1e4f-4d10-93cc-ac99ed19ee61
+
+	measure 'Return Value' = SUM ( 'a_FactSalesDaily_portfolio'[ReturnValue_USD] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Commercial Performance
+		lineageTag: fd06cae6-26bf-434f-8845-c6fceedde266
+
+	/// Reported return value divided by recorded revenue in the same filter context.
+	measure 'Return Value Rate %' = DIVIDE ( [Return Value], [Total Revenue] )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Commercial Performance
+		lineageTag: 02d0b389-3085-4084-ad73-0de77bd79eae
+
+	/// Units-sold-weighted average of the source decimal discount rates, including explicit zero rates.
+	measure 'Discount Rate %' =
+			VAR WeightedDiscount =
+			    SUMX (
+			        'a_FactSalesDaily_portfolio',
+			        'a_FactSalesDaily_portfolio'[DiscountPct] * 'a_FactSalesDaily_portfolio'[UnitsSold]
+			    )
+			VAR UnitsWithDiscountData =
+			    CALCULATE ( [Units Sold], KEEPFILTERS ( NOT ISBLANK ( 'a_FactSalesDaily_portfolio'[DiscountPct] ) ) )
+			RETURN
+			    DIVIDE ( WeightedDiscount, UnitsWithDiscountData )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Commercial Performance
+		lineageTag: 43e5e05a-ccab-48eb-aeb9-81cb19c30f95
+
+	/// Compares selected dates within one month with the prior month, aligning month ends. Other date scopes return blank.
+	measure 'Revenue Previous Month' =
+			VAR SelectedDates = VALUES ( 'a_DimDate_portfolio'[Date] )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			VAR FirstSelectedDate = MIN ( 'a_DimDate_portfolio'[Date] )
+			VAR FirstComparisonDate =
+			    IF ( NOT ISBLANK ( FirstSelectedDate ), EDATE ( FirstSelectedDate, -1 ) )
+			VAR ComparisonDates =
+			    FILTER (
+			        ALL ( 'a_DimDate_portfolio' ),
+			        VAR ComparisonDate = 'a_DimDate_portfolio'[Date]
+			        VAR ShiftedDate = EDATE ( ComparisonDate, 1 )
+			        RETURN
+			            ShiftedDate IN SelectedDates
+			                || (
+			                    ComparisonDate = EOMONTH ( ComparisonDate, 0 )
+			                        && EOMONTH ( ShiftedDate, 0 ) IN SelectedDates
+			                )
+			    )
+			RETURN
+			    IF (
+			        HASONEVALUE ( 'a_DimDate_portfolio'[MonthYear] ) && FirstComparisonDate >= CalendarStart,
+			        CALCULATE ( [Total Revenue], ComparisonDates )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Trend Analysis
+		lineageTag: 6dded750-3aff-4224-b366-f2f046b5ee2b
+
+	measure 'Revenue MoM %' =
+			VAR CurrentValue = [Total Revenue]
+			VAR PriorValue = [Revenue Previous Month]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentValue ) && NOT ISBLANK ( PriorValue ),
+			        DIVIDE ( CurrentValue - PriorValue, PriorValue )
+			    )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Trend Analysis
+		lineageTag: 9386dd20-a9cb-4a99-bb86-77ae4b7e02dd
+
+	/// Sums revenue from the first day of the 3-month window through the last visible date. Returns blank if the window starts before the calendar.
+	measure 'Revenue Rolling 3 Months' =
+			VAR EndDate = MAX ( 'a_DimDate_portfolio'[Date] )
+			VAR StartDate = IF ( NOT ISBLANK ( EndDate ), EOMONTH ( EndDate, -3 ) + 1 )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( EndDate ) && StartDate >= CalendarStart,
+			        CALCULATE (
+			            [Total Revenue],
+			            FILTER ( ALL ( 'a_DimDate_portfolio' ), 'a_DimDate_portfolio'[Date] >= StartDate && 'a_DimDate_portfolio'[Date] <= EndDate )
+			        )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Trend Analysis
+		lineageTag: f3390318-fa29-442d-b7e4-898d55885f63
+
+	/// Sums revenue from the first day of the 12-month window through the last visible date. Returns blank if the window starts before the calendar.
+	measure 'Revenue Rolling 12 Months' =
+			VAR EndDate = MAX ( 'a_DimDate_portfolio'[Date] )
+			VAR StartDate = IF ( NOT ISBLANK ( EndDate ), EOMONTH ( EndDate, -12 ) + 1 )
+			VAR CalendarStart = CALCULATE ( MIN ( 'a_DimDate_portfolio'[Date] ), REMOVEFILTERS ( 'a_DimDate_portfolio' ) )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( EndDate ) && StartDate >= CalendarStart,
+			        CALCULATE (
+			            [Total Revenue],
+			            FILTER ( ALL ( 'a_DimDate_portfolio' ), 'a_DimDate_portfolio'[Date] >= StartDate && 'a_DimDate_portfolio'[Date] <= EndDate )
+			        )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Trend Analysis
+		lineageTag: a109cce8-1dfe-4513-961e-dd2faa35c09f
+
+	measure 'Executive Revenue Change' =
+			VAR ChangeValue = [Revenue YoY %]
+			RETURN
+			    IF (
+			        HASONEVALUE ( 'a_DimDate_portfolio'[Year] ) && NOT ISBLANK ( ChangeValue ),
+			        ROUND ( ChangeValue, 4 )
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: b61b6ccc-7fb3-4592-a565-5f5ff8ebfd03
+
+	measure 'Executive Revenue Comparison' =
+			VAR ChangeValue = [Executive Revenue Change]
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR Direction = SWITCH ( TRUE (), ChangeValue > 0, UNICHAR ( 9650 ), ChangeValue < 0, UNICHAR ( 9660 ), UNICHAR ( 8212 ) )
+			RETURN
+			    IF (
+			        ISBLANK ( SelectedYear ),
+			        "Select one year to compare",
+			        IF (
+			            ISBLANK ( ChangeValue ),
+			            "No prior-year comparison",
+			            Direction & " " & FORMAT ( ChangeValue, "+0.00%;-0.00%;0.00%" )
+			                & " vs. " & FORMAT ( SelectedYear - 1, "0" )
+			        )
+			    )
+		displayFolder: Executive Overview
+		lineageTag: a818c2f0-ccea-4048-95c6-ef6872969168
+
+	measure 'Executive Profit Change' =
+			VAR ChangeValue = [Profit YoY %]
+			RETURN
+			    IF (
+			        HASONEVALUE ( 'a_DimDate_portfolio'[Year] ) && NOT ISBLANK ( ChangeValue ),
+			        ROUND ( ChangeValue, 4 )
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: 44b2bfbd-f400-4e35-870d-abc15381cbc4
+
+	measure 'Executive Profit Comparison' =
+			VAR ChangeValue = [Executive Profit Change]
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR Direction = SWITCH ( TRUE (), ChangeValue > 0, UNICHAR ( 9650 ), ChangeValue < 0, UNICHAR ( 9660 ), UNICHAR ( 8212 ) )
+			RETURN
+			    IF (
+			        ISBLANK ( SelectedYear ),
+			        "Select one year to compare",
+			        IF (
+			            ISBLANK ( ChangeValue ),
+			            "No prior-year comparison",
+			            Direction & " " & FORMAT ( ChangeValue, "+0.00%;-0.00%;0.00%" )
+			                & " vs. " & FORMAT ( SelectedYear - 1, "0" )
+			        )
+			    )
+		displayFolder: Executive Overview
+		lineageTag: 7efc6f97-f52b-4e47-90ba-5dbfdcabba55
+
+	measure 'Executive Margin Change' =
+			VAR ChangeValue = [Margin Change (pp)]
+			RETURN
+			    IF (
+			        HASONEVALUE ( 'a_DimDate_portfolio'[Year] ) && NOT ISBLANK ( ChangeValue ),
+			        ROUND ( ChangeValue, 2 )
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: fbb628ec-db9e-43e8-baea-9665d5fc83c6
+
+	measure 'Executive Margin Comparison' =
+			VAR ChangeValue = [Executive Margin Change]
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR Direction = SWITCH ( TRUE (), ChangeValue > 0, UNICHAR ( 9650 ), ChangeValue < 0, UNICHAR ( 9660 ), UNICHAR ( 8212 ) )
+			RETURN
+			    IF (
+			        ISBLANK ( SelectedYear ),
+			        "Select one year to compare",
+			        IF (
+			            ISBLANK ( ChangeValue ),
+			            "No prior-year comparison",
+			            Direction & " " & FORMAT ( ChangeValue, "+0.00;-0.00;0.00" ) & " pp"
+			                & " vs. " & FORMAT ( SelectedYear - 1, "0" )
+			        )
+			    )
+		displayFolder: Executive Overview
+		lineageTag: 6f0e15d1-e074-48a7-b787-e9e1b7029cb5
+
+	measure 'Executive Units Change' =
+			VAR ChangeValue = [Units YoY %]
+			RETURN
+			    IF (
+			        HASONEVALUE ( 'a_DimDate_portfolio'[Year] ) && NOT ISBLANK ( ChangeValue ),
+			        ROUND ( ChangeValue, 4 )
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: 24e9d3fe-9e20-4b19-88a2-e27ec3d9898c
+
+	measure 'Executive Units Comparison' =
+			VAR ChangeValue = [Executive Units Change]
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR Direction = SWITCH ( TRUE (), ChangeValue > 0, UNICHAR ( 9650 ), ChangeValue < 0, UNICHAR ( 9660 ), UNICHAR ( 8212 ) )
+			RETURN
+			    IF (
+			        ISBLANK ( SelectedYear ),
+			        "Select one year to compare",
+			        IF (
+			            ISBLANK ( ChangeValue ),
+			            "No prior-year comparison",
+			            Direction & " " & FORMAT ( ChangeValue, "+0.00%;-0.00%;0.00%" )
+			                & " vs. " & FORMAT ( SelectedYear - 1, "0" )
+			        )
+			    )
+		displayFolder: Executive Overview
+		lineageTag: d9a8198c-cf5b-4c73-a68c-36720cbd5493
+
+	measure 'Executive Growth Highlight' =
+			VAR __Year = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR __RevenueChange = [Executive Revenue Change]
+			VAR __ProfitChange = [Executive Profit Change]
+			VAR __MarginChange = [Executive Margin Change]
+			VAR __RevenueText = IF ( ISBLANK ( __RevenueChange ), "n/a", FORMAT ( __RevenueChange, "+0.00%;-0.00%;0.00%" ) )
+			VAR __ProfitText = IF ( ISBLANK ( __ProfitChange ), "n/a", FORMAT ( __ProfitChange, "+0.00%;-0.00%;0.00%" ) )
+			VAR __GrowthText =
+			    SWITCH (
+			        TRUE (),
+			        __ProfitChange > 0 && __RevenueChange > 0 && __ProfitChange > __RevenueChange,
+			            "Profit " & __ProfitText & " outpaced revenue " & __RevenueText,
+			        __ProfitChange > 0 && __RevenueChange > 0 && __ProfitChange < __RevenueChange,
+			            "Profit " & __ProfitText & " trailed revenue " & __RevenueText,
+			        "Revenue " & __RevenueText & " · Profit " & __ProfitText
+			    )
+			VAR __MarginText = IF ( ISBLANK ( __MarginChange ), "n/a", FORMAT ( __MarginChange, "+0.00;-0.00;0.00" ) & " pp" )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( __Year ), "Select one year for a prior-year comparison.",
+			        ISBLANK ( __RevenueChange ) && ISBLANK ( __ProfitChange ) && ISBLANK ( __MarginChange ),
+			            "No prior-year comparison available.",
+			        __GrowthText & " · Margin " & __MarginText
+			    )
+		displayFolder: Executive Overview
+		lineageTag: f0b1960a-a758-42f9-ae64-958a0efc86e0
+
+	measure 'Executive Margin Highlight' =
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR ChangeValue = [Executive Margin Change]
+			VAR PriorYear = " vs. " & FORMAT ( SelectedYear - 1, "0" ) & "."
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( SelectedYear ), "Select one year to compare margins.",
+			        ISBLANK ( ChangeValue ), "No prior-year margin comparison.",
+			        ChangeValue = 0, "Margin held steady" & PriorYear,
+			        ChangeValue > 0, "Margin improved" & PriorYear,
+			        "Margin declined" & PriorYear
+			    )
+		displayFolder: Executive Overview
+		lineageTag: d3bf528e-9f5c-4fea-906a-cbd9cafaa774
+
+	measure 'Executive Category Highlight' =
+			VAR __PortfolioMargin = [Profit Margin %]
+			VAR __Categories =
+			    FILTER (
+			        ADDCOLUMNS (
+			            VALUES ( 'a_DimProduct_portfolio'[Category] ),
+			            "@Revenue", [Total Revenue],
+			            "@Margin", [Profit Margin %]
+			        ),
+			        NOT ISBLANK ( 'a_DimProduct_portfolio'[Category] ) && [@Revenue] > 0 && NOT ISBLANK ( [@Margin] )
+			    )
+			VAR __BelowBenchmark =
+			    FILTER ( __Categories, ROUND ( ( __PortfolioMargin - [@Margin] ) * 100, 2 ) > 0 )
+			VAR __Focus =
+			    TOPN ( 1, __BelowBenchmark, [@Revenue], DESC, [@Margin], ASC, 'a_DimProduct_portfolio'[Category], ASC )
+			VAR __Name = MAXX ( __Focus, 'a_DimProduct_portfolio'[Category] )
+			VAR __Revenue = MAXX ( __Focus, [@Revenue] )
+			VAR __Margin = MAXX ( __Focus, [@Margin] )
+			VAR __Gap = ( __PortfolioMargin - __Margin ) * 100
+			VAR __RevenueText =
+			    SWITCH (
+			        TRUE (),
+			        __Revenue >= 1000000, FORMAT ( DIVIDE ( __Revenue, 1000000 ), "$0.00" ) & "M",
+			        __Revenue >= 1000, FORMAT ( DIVIDE ( __Revenue, 1000 ), "$0.00" ) & "K",
+			        FORMAT ( __Revenue, "$#,0.00" )
+			    )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( __PortfolioMargin ) || COUNTROWS ( __Categories ) < 2, "Select two or more categories with sales.",
+			        ISEMPTY ( __Focus ), "No category is below the portfolio margin at this precision.",
+			        __Name & " " & __RevenueText & " · " & FORMAT ( __Margin, "0.00%" )
+			            & " margin · " & FORMAT ( __Gap, "0.00" ) & " pp below"
+			    )
+		displayFolder: Executive Overview
+		lineageTag: 0dc8b9e9-f4b2-40bb-b848-16543dfb10b4
+
+	measure 'Executive Category Margin Color' =
+			VAR CurrentValue = [Profit Margin %]
+			VAR Benchmark = CALCULATE ( [Profit Margin %], ALLSELECTED ( 'a_DimProduct_portfolio'[Category] ) )
+			RETURN
+			    IF (
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Category] )
+			            && NOT ISBLANK ( CurrentValue )
+			            && NOT ISBLANK ( Benchmark )
+			            && ROUND ( CurrentValue, 4 ) < ROUND ( Benchmark, 4 ),
+			        "#FCEFEB",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: dee2573d-89fa-41b7-8650-2275cd09ed6d
+
+	measure 'Executive Category Return Rate Color' =
+			VAR CurrentValue = [Return Rate %]
+			VAR Benchmark = CALCULATE ( [Return Rate %], ALLSELECTED ( 'a_DimProduct_portfolio'[Category] ) )
+			RETURN
+			    IF (
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Category] )
+			            && NOT ISBLANK ( CurrentValue )
+			            && NOT ISBLANK ( Benchmark )
+			            && ROUND ( CurrentValue, 4 ) > ROUND ( Benchmark, 4 ),
+			        "#FCEFEB",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: 75f00a8b-176e-4883-bbea-1d82d2c76443
+
+	measure 'Product Margin Benchmark Color' =
+			VAR CurrentRate = [Profit Margin %]
+			VAR SelectedRate =
+			    CALCULATE ( [Profit Margin %], ALLSELECTED ( 'a_DimProduct_portfolio'[Product], 'a_DimProduct_portfolio'[Category] ) )
+			RETURN
+			    IF (
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Product] )
+			            && NOT ISBLANK ( CurrentRate )
+			            && NOT ISBLANK ( SelectedRate )
+			            && ROUND ( CurrentRate, 4 ) < ROUND ( SelectedRate, 4 ),
+			        "#FCEFEB",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Product & Channel Performance
+		lineageTag: 47448334-68cd-461e-a84b-45cb7e2a9971
+
+	measure 'Product Return Benchmark Color' =
+			VAR CurrentRate = [Return Rate %]
+			VAR SelectedRate =
+			    CALCULATE ( [Return Rate %], ALLSELECTED ( 'a_DimProduct_portfolio'[Product], 'a_DimProduct_portfolio'[Category] ) )
+			RETURN
+			    IF (
+			        ISINSCOPE ( 'a_DimProduct_portfolio'[Product] )
+			            && NOT ISBLANK ( CurrentRate )
+			            && NOT ISBLANK ( SelectedRate )
+			            && ROUND ( CurrentRate, 4 ) > ROUND ( SelectedRate, 4 ),
+			        "#FCEFEB",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Product & Channel Performance
+		lineageTag: 48fb4007-559b-4196-a5a9-eaf8d6453a7c
+
+	measure 'Product Return Rate Rank' =
+			VAR CurrentProduct = SELECTEDVALUE ( 'a_DimProduct_portfolio'[Product] )
+			VAR CurrentRate = [Return Rate %]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( CurrentProduct ) && NOT ISBLANK ( CurrentRate ),
+			        1 + COUNTROWS (
+			            FILTER (
+			                ALLSELECTED ( 'a_DimProduct_portfolio'[Product] ),
+			                VAR PeerRate = [Return Rate %]
+			                RETURN
+			                    NOT ISBLANK ( PeerRate )
+			                        && (
+			                            PeerRate > CurrentRate
+			                                || ( PeerRate = CurrentRate && 'a_DimProduct_portfolio'[Product] < CurrentProduct )
+			                        )
+			            )
+			        )
+			    )
+		formatString: 0
+		isHidden
+		displayFolder: Product & Channel Performance
+		lineageTag: 4f94f2ab-dd86-4e77-9efd-ed5a27e03250
+
+	/// Converts the existing three-month total into revenue per month for comparison with actual monthly revenue.
+	measure 'Trailing 3-Month Average Revenue' = DIVIDE ( [Revenue Rolling 3 Months], 3 )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Market & Sales Trends
+		lineageTag: 0d131033-e38a-4deb-9492-83a3ccc7b8aa
+
+	/// Averages each calendar month's revenue across years with data in the current geographic scope. Ignores the Year filter.
+	measure 'Average Revenue by Calendar Month' =
+			VAR VisibleMonths = VALUES ( 'a_DimDate_portfolio'[MonthNo] )
+			RETURN
+			    CALCULATE (
+			        AVERAGEX ( VALUES ( 'a_DimDate_portfolio'[Year] ), [Total Revenue] ),
+			        FILTER (
+			            ALL ( 'a_DimDate_portfolio' ),
+			            'a_DimDate_portfolio'[MonthNo] IN VisibleMonths
+			                && 'a_DimDate_portfolio'[Year] >= 2020
+			                && 'a_DimDate_portfolio'[Year] <= 2025
+			        )
+			    )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Market & Sales Trends
+		lineageTag: b22fa2e8-c032-450e-bebd-758def5f8031
+
+	/// Displays actual monthly revenue only when Year is directly filtered to one calendar year.
+	measure 'Selected-Year Monthly Revenue' = IF ( HASONEFILTER ( 'a_DimDate_portfolio'[Year] ), [Total Revenue] )
+		formatString: $#,0.00;($#,0.00);$0.00
+		displayFolder: Market & Sales Trends
+		lineageTag: 5b7ac2d5-32c3-4f34-97ea-3139d6a56d40
+
+	measure 'Revenue KPI SVG' =
+			VAR RevenueValue = [Total Revenue]
+			VAR ComparisonChange = [Executive Revenue Change]
+			VAR RevenueText =
+			    IF ( ISBLANK ( RevenueValue ), "No revenue", FORMAT ( DIVIDE ( RevenueValue, 1000000 ), "$0.00", "en-US" ) & "M" )
+			VAR ComparisonText = COALESCE ( [Executive Revenue Comparison], "No prior-year comparison" )
+			VAR ComparisonColor =
+			    SWITCH ( TRUE (), ComparisonChange > 0, "16804A", ComparisonChange < 0, "C24141", "64748B" )
+			// Encode dynamic text as URI-escaped XML character references.
+			VAR EncodedRevenue =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( RevenueText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( RevenueText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			VAR EncodedComparison =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ComparisonText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ComparisonText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3ERevenue%3A%20"
+			        & EncodedRevenue & "%20%7C%20" & EncodedComparison
+			        & "%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23245E98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22M31%2044v22h23M36%2061v-6m7%206V50m7%2011V45%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3EREVENUE%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23245E98%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E"
+			        & EncodedRevenue
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%23" & ComparisonColor & "%22%3E"
+			        & EncodedComparison & "%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Executive Overview\Prototypes
+		lineageTag: 4f979e55-5fba-4389-b83b-a2863215e354
+		dataCategory: ImageUrl
+
+	measure 'Profit KPI SVG' =
+			VAR __SvgMetricAmount = [Total Profit]
+			VAR ComparisonChange = [Executive Profit Change]
+			VAR KpiText =
+			    IF ( ISBLANK ( __SvgMetricAmount ), "No data", FORMAT ( DIVIDE ( __SvgMetricAmount, 1000000 ), "$0.00", "en-US" ) & "M" )
+			VAR ComparisonText = COALESCE ( [Executive Profit Comparison], "No prior-year comparison" )
+			VAR ComparisonColor =
+			    SWITCH ( TRUE (), ComparisonChange > 0, "16804A", ComparisonChange < 0, "C24141", "64748B" )
+			// Encode dynamic text as URI-escaped XML character references.
+			VAR EncodedKpi =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( KpiText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( KpiText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			VAR EncodedComparison =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ComparisonText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ComparisonText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3EPROFIT%3A%20"
+			        & EncodedKpi & "%20%7C%20" & EncodedComparison
+			        & "%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23245E98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22M49%2047c-1-2-3-3-6-3-4%200-6%202-6%205%200%206%2012%203%2012%209%200%203-2%205-6%205-3%200-5-1-7-3m7-19v25%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3EPROFIT%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23245E98%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E"
+			        & EncodedKpi
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%23" & ComparisonColor & "%22%3E"
+			        & EncodedComparison & "%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Executive Overview\SVG KPIs
+		lineageTag: 0304312f-33b5-4877-9159-e169ad4eb0ad
+		dataCategory: ImageUrl
+
+	measure 'Profit Margin KPI SVG' =
+			VAR __SvgMetricAmount = [Profit Margin %]
+			VAR ComparisonChange = [Executive Margin Change]
+			VAR KpiText =
+			    IF ( ISBLANK ( __SvgMetricAmount ), "No data", FORMAT ( __SvgMetricAmount, "0.00%", "en-US" ) )
+			VAR ComparisonText = COALESCE ( [Executive Margin Comparison], "No prior-year comparison" )
+			VAR ComparisonColor =
+			    SWITCH ( TRUE (), ComparisonChange > 0, "16804A", ComparisonChange < 0, "C24141", "64748B" )
+			// Encode dynamic text as URI-escaped XML character references.
+			VAR EncodedKpi =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( KpiText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( KpiText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			VAR EncodedComparison =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ComparisonText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ComparisonText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3EPROFIT%20MARGIN%3A%20"
+			        & EncodedKpi & "%20%7C%20" & EncodedComparison
+			        & "%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23245E98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22m35%2063%2016-18%22%2F%3E%3Ccircle%20cx%3D%2237%22%20cy%3D%2248%22%20r%3D%223.5%22%2F%3E%3Ccircle%20cx%3D%2249%22%20cy%3D%2260%22%20r%3D%223.5%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3EPROFIT%20MARGIN%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23245E98%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E"
+			        & EncodedKpi
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%23" & ComparisonColor & "%22%3E"
+			        & EncodedComparison & "%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Executive Overview\SVG KPIs
+		lineageTag: 7b8c5d98-4193-4414-a905-d815eaeb2c30
+		dataCategory: ImageUrl
+
+	measure 'Units Sold KPI SVG' =
+			VAR __SvgMetricAmount = [Units Sold]
+			VAR ComparisonChange = [Executive Units Change]
+			VAR KpiText =
+			    IF ( ISBLANK ( __SvgMetricAmount ), "No data", IF ( ABS ( __SvgMetricAmount ) >= 1000, FORMAT ( DIVIDE ( __SvgMetricAmount, 1000 ), "0.00", "en-US" ) & "K", FORMAT ( __SvgMetricAmount, "#,0", "en-US" ) ) )
+			VAR ComparisonText = COALESCE ( [Executive Units Comparison], "No prior-year comparison" )
+			VAR ComparisonColor =
+			    SWITCH ( TRUE (), ComparisonChange > 0, "16804A", ComparisonChange < 0, "C24141", "64748B" )
+			// Encode dynamic text as URI-escaped XML character references.
+			VAR EncodedKpi =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( KpiText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( KpiText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			VAR EncodedComparison =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ComparisonText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ComparisonText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3EUNITS%20SOLD%3A%20"
+			        & EncodedKpi & "%20%7C%20" & EncodedComparison
+			        & "%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23245E98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22m31%2049%2011-6%2011%206v12l-11%206-11-6zm0%200%2011%206%2011-6m-11%206v12m-5.5-21%2011%206%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3EUNITS%20SOLD%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23245E98%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E"
+			        & EncodedKpi
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%23" & ComparisonColor & "%22%3E"
+			        & EncodedComparison & "%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Executive Overview\SVG KPIs
+		lineageTag: 198282ad-4a38-4b61-9aa0-c3ca0d3bd215
+		dataCategory: ImageUrl
+
+	measure 'Return Rate KPI SVG' =
+			VAR __SvgReturnRate = [Return Rate %]
+			VAR RateText = IF ( ISBLANK ( __SvgReturnRate ), "No data", FORMAT ( __SvgReturnRate, "0.00%", "en-US" ) )
+			VAR EncodedRate =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( RateText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( RateText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3EReturn%20rate%3A%20" & EncodedRate
+			        & "%20(returned%20units%20divided%20by%20units%20sold)%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23AF593F%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22m38%2046-7%207%207%207m-7-7h16a7%207%200%200%201%200%2014h-6%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3ERETURN%20RATE%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23102A4C%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E" & EncodedRate
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%2364748B%22%3EReturned%20units%20%C3%B7%20units%20sold%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Product & Channel Performance\SVG KPIs
+		lineageTag: 71c061ea-abea-41cf-acba-de50fd8c2d98
+		dataCategory: ImageUrl
+
+	measure 'Revenue YoY KPI SVG' =
+			VAR __SvgYoYChange = [Executive Revenue Change]
+			VAR SelectedYear = SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			VAR ValueText = IF ( ISBLANK ( __SvgYoYChange ), UNICHAR ( 8212 ), FORMAT ( __SvgYoYChange, "+0.00%;-0.00%;0.00%", "en-US" ) )
+			VAR ContextText =
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( SelectedYear ), "Select one year to compare",
+			        ISBLANK ( __SvgYoYChange ), "No prior-year comparison",
+			        "vs. " & FORMAT ( SelectedYear - 1, "0", "en-US" )
+			    )
+			VAR ValueColor = SWITCH ( TRUE (), __SvgYoYChange > 0, "16804A", __SvgYoYChange < 0, "C24141", "64748B" )
+			VAR EncodedValue =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ValueText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ValueText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			VAR EncodedContext =
+			    CONCATENATEX (
+			        GENERATESERIES ( 1, LEN ( ContextText ) ),
+			        "%26%23" & FORMAT ( UNICODE ( MID ( ContextText, [Value], 1 ) ), "0", "en-US" ) & "%3B",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;charset=utf-8,"
+			        & "%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22296%22%20height%3D%22110%22%20viewBox%3D%220%200%20296%20110%22%20preserveAspectRatio%3D%22xMidYMid%20meet%22%20role%3D%22img%22%20aria-labelledby%3D%22title%22%3E%3Ctitle%20id%3D%22title%22%3ERevenue%20year-over-year%3A%20" & EncodedValue & "%20" & EncodedContext
+			        & "%3C%2Ftitle%3E%3Crect%20x%3D%22.5%22%20y%3D%22.5%22%20width%3D%22295%22%20height%3D%22109%22%20rx%3D%2212%22%20fill%3D%22%23F5F6F8%22%20stroke%3D%22%23D9DEE5%22%2F%3E%3Crect%20x%3D%2218%22%20y%3D%2231%22%20width%3D%2248%22%20height%3D%2248%22%20rx%3D%2211%22%20fill%3D%22%23E2E8F0%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23245E98%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20aria-hidden%3D%22true%22%3E%3Cpath%20d%3D%22M31%2044v22h23M35%2059l6-7%205%202%207-9m-7%200h7v7%22%2F%3E%3C%2Fg%3E%3Cg%20font-family%3D%22Segoe%20UI%2C%20Arial%2C%20sans-serif%22%3E%3Ctext%20x%3D%2284%22%20y%3D%2229%22%20fill%3D%22%2364748B%22%20font-size%3D%2212%22%20font-weight%3D%22600%22%20letter-spacing%3D%221.2%22%3EREVENUE%20YOY%20%25%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2263%22%20fill%3D%22%23" & ValueColor & "%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3E" & EncodedValue
+			        & "%3C%2Ftext%3E%3Ctext%20x%3D%2284%22%20y%3D%2288%22%20font-size%3D%2213%22%20font-weight%3D%22600%22%20fill%3D%22%2364748B%22%3E" & EncodedContext & "%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+		displayFolder: Market & Sales Trends\SVG KPIs
+		lineageTag: 621aef2f-22b4-4cd8-80bd-928af9855d7d
+		dataCategory: ImageUrl
+
+	measure 'Executive Return Rate Highlight' =
+			VAR __PortfolioReturnRate = [Return Rate %]
+			VAR __Categories =
+			    FILTER (
+			        ADDCOLUMNS (
+			            VALUES ( 'a_DimProduct_portfolio'[Category] ),
+			            "@Units", [Units Sold],
+			            "@ReturnRate", [Return Rate %]
+			        ),
+			        NOT ISBLANK ( 'a_DimProduct_portfolio'[Category] ) && [@Units] > 0 && NOT ISBLANK ( [@ReturnRate] )
+			    )
+			VAR __AboveBenchmark =
+			    FILTER ( __Categories, ROUND ( ( [@ReturnRate] - __PortfolioReturnRate ) * 100, 2 ) > 0 )
+			VAR __Focus =
+			    TOPN ( 1, __AboveBenchmark, [@ReturnRate], DESC, [@Units], DESC, 'a_DimProduct_portfolio'[Category], ASC )
+			VAR __Name = MAXX ( __Focus, 'a_DimProduct_portfolio'[Category] )
+			VAR __Rate = MAXX ( __Focus, [@ReturnRate] )
+			VAR __Gap = ( __Rate - __PortfolioReturnRate ) * 100
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( __PortfolioReturnRate ) || COUNTROWS ( __Categories ) < 2, "Select two or more categories with unit sales.",
+			        ISEMPTY ( __Focus ), "No category exceeds the portfolio return rate at the displayed precision.",
+			        __Name & " " & FORMAT ( __Rate, "0.00%" ) & " vs. "
+			            & FORMAT ( __PortfolioReturnRate, "0.00%" ) & " portfolio (+" & FORMAT ( __Gap, "0.00" ) & " pp)"
+			    )
+		displayFolder: Executive Overview
+		lineageTag: a1268691-d68d-4094-a833-c555841ea27b
+
+	measure 'Executive Category Margin Background Color' =
+			VAR __SelectedCategories = ALLSELECTED ( 'a_DimProduct_portfolio'[Category] )
+			VAR __CategoryValue = [Profit Margin %]
+			VAR __PortfolioValue = CALCULATE ( [Profit Margin %], __SelectedCategories )
+			VAR __CategoryRounded = ROUND ( __CategoryValue, 4 )
+			VAR __PortfolioRounded = ROUND ( __PortfolioValue, 4 )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        NOT ISINSCOPE ( 'a_DimProduct_portfolio'[Category] )
+			            || COUNTROWS ( __SelectedCategories ) < 2
+			            || ISBLANK ( __CategoryValue )
+			            || ISBLANK ( __PortfolioValue ), "#FFFFFF",
+			        __CategoryRounded > __PortfolioRounded, "#E7F4EC",
+			        __CategoryRounded < __PortfolioRounded, "#FBEAE7",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: 9dba3fdd-07df-42ac-b885-16f58e4df173
+
+	measure 'Executive Category Return Rate Background Color' =
+			VAR __SelectedCategories = ALLSELECTED ( 'a_DimProduct_portfolio'[Category] )
+			VAR __CategoryValue = [Return Rate %]
+			VAR __PortfolioValue = CALCULATE ( [Return Rate %], __SelectedCategories )
+			VAR __CategoryRounded = ROUND ( __CategoryValue, 4 )
+			VAR __PortfolioRounded = ROUND ( __PortfolioValue, 4 )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        NOT ISINSCOPE ( 'a_DimProduct_portfolio'[Category] )
+			            || COUNTROWS ( __SelectedCategories ) < 2
+			            || ISBLANK ( __CategoryValue )
+			            || ISBLANK ( __PortfolioValue ), "#FFFFFF",
+			        __CategoryRounded < __PortfolioRounded, "#E7F4EC",
+			        __CategoryRounded > __PortfolioRounded, "#FBEAE7",
+			        "#FFFFFF"
+			    )
+		isHidden
+		displayFolder: Executive Overview
+		lineageTag: af16fe0e-9945-4587-b6bb-9e03e4f54d88
+
+	measure 'Seasonality Tooltip Month' =
+			VAR __MonthNumber = SELECTEDVALUE ( 'a_DimDate_portfolio'[MonthNo] )
+			VAR __Year =
+			    IF (
+			        HASONEFILTER ( 'a_DimDate_portfolio'[Year] ),
+			        SELECTEDVALUE ( 'a_DimDate_portfolio'[Year] )
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( __MonthNumber ),
+			        FORMAT (
+			            DATE ( COALESCE ( __Year, 2000 ), __MonthNumber, 1 ),
+			            IF ( ISBLANK ( __Year ), "MMMM", "MMMM yyyy" ),
+			            "en-US"
+			        )
+			    )
+		displayFolder: Market & Sales Trends
+		lineageTag: 1e79ecf9-4ab4-47bf-92a4-16865a95bfe1
+
+	measure 'Seasonality Revenue Variance' =
+			VAR __SelectedRevenue = [Selected-Year Monthly Revenue]
+			VAR __HistoricalAverage = [Average Revenue by Calendar Month]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( __SelectedRevenue ) && NOT ISBLANK ( __HistoricalAverage ),
+			        __SelectedRevenue - __HistoricalAverage
+			    )
+		formatString: +$#,0.00;-$#,0.00;$0.00
+		displayFolder: Market & Sales Trends
+		lineageTag: be70dc18-0448-438a-943e-66a3cef5e938
+
+	measure 'Seasonality Revenue Variance %' = DIVIDE ( [Seasonality Revenue Variance], [Average Revenue by Calendar Month] )
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Market & Sales Trends
+		lineageTag: 783754c9-a8dc-4c5e-b876-3c9633386e6a
+
+	column Placeholder
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 555800b5-d465-4d70-8bee-3a936f5b7105
+		summarizeBy: sum
+		sourceColumn: Placeholder
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlSKjQUA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Placeholder = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Placeholder", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

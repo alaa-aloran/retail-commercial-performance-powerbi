@@ -1,0 +1,145 @@
+table a_FactSalesDaily_portfolio
+	lineageTag: bfadbb8b-aa77-4df5-9ba9-524223cec807
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5c0a1ca6-0d67-4e7f-b662-e1fb51f3a628
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ProductID
+		dataType: string
+		lineageTag: e293a595-48b3-41b9-96ae-2d006a605317
+		summarizeBy: none
+		sourceColumn: ProductID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LocationID
+		dataType: string
+		lineageTag: 1beac743-1de3-4a71-a00b-4575cd40690c
+		summarizeBy: none
+		sourceColumn: LocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Channel
+		dataType: string
+		lineageTag: a11bba21-5cae-4016-b824-fc347a332456
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerSegment
+		dataType: string
+		lineageTag: 25579442-60b1-4716-8db8-c19e69f0dd3d
+		summarizeBy: none
+		sourceColumn: CustomerSegment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Campaign
+		dataType: string
+		lineageTag: 619d97af-a2e9-4a1b-9ec0-0810150c9b65
+		summarizeBy: none
+		sourceColumn: Campaign
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPct
+		dataType: double
+		isHidden
+		lineageTag: e2608bac-762c-4f93-87a1-ca74e9edfbf6
+		summarizeBy: sum
+		sourceColumn: DiscountPct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column UnitsSold
+		dataType: int64
+		formatString: 0
+		lineageTag: 812a5f84-7c05-4a3d-823c-16f48d3cf4c4
+		summarizeBy: sum
+		sourceColumn: UnitsSold
+
+		annotation SummarizationSetBy = Automatic
+
+	column Revenue_USD
+		dataType: double
+		lineageTag: 48288ecd-9413-42c3-b74e-52de0a116b2d
+		summarizeBy: sum
+		sourceColumn: Revenue_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Cost_USD
+		dataType: double
+		lineageTag: 275868c9-8494-4986-b3dd-274536af2436
+		summarizeBy: sum
+		sourceColumn: Cost_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Profit_USD
+		dataType: double
+		lineageTag: 74ffe20b-6d1e-4fc7-aca6-f20b09d61f2f
+		summarizeBy: sum
+		sourceColumn: Profit_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ReturnUnits
+		dataType: int64
+		formatString: 0
+		lineageTag: e7c574d8-87b1-4c2f-856f-5d1f53fe0820
+		summarizeBy: sum
+		sourceColumn: ReturnUnits
+
+		annotation SummarizationSetBy = Automatic
+
+	column ReturnValue_USD
+		dataType: double
+		lineageTag: f9d647e8-49fd-42b5-a988-421fe19a3516
+		summarizeBy: sum
+		sourceColumn: ReturnValue_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PaymentMethod
+		dataType: string
+		lineageTag: 119c946d-ea94-4e74-8091-faf8108d75b5
+		summarizeBy: none
+		sourceColumn: PaymentMethod
+
+		annotation SummarizationSetBy = Automatic
+
+	partition a_FactSalesDaily_portfolio = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/alaa-aloran/retail-commercial-performance-powerbi/main/sales_data/a_FactSalesDaily_portfolio.csv"),[Delimiter=",", Columns=14, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Date", type date}, {"ProductID", type text}, {"LocationID", type text}, {"Channel", type text}, {"CustomerSegment", type text}, {"Campaign", type text}, {"DiscountPct", type number}, {"UnitsSold", Int64.Type}, {"Revenue_USD", type number}, {"Cost_USD", type number}, {"Profit_USD", type number}, {"ReturnUnits", Int64.Type}, {"ReturnValue_USD", type number}, {"PaymentMethod", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+
