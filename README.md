@@ -86,13 +86,15 @@ The dataset contains aggregated sales records rather than individual customer tr
 
 **Option 1 — Explore the completed dashboard**
 
-[Download the Interactive Power BI Dashboard (.pbix)](Retail_Commercial_Performance.pbix)
+[📥 Download the Interactive Power BI Dashboard (.pbix)](Retail_Commercial_Performance.pbix)
 
 Open the downloaded file in Power BI Desktop. The report includes imported synthetic data, so no initial refresh is required.
 
 **Option 2 — Review the development project**
 
-Open `Retail_Commercial_Performance.pbip` in a compatible Power BI Desktop version to inspect the editable report and semantic-model definitions.
+[📂 View the Editable Power BI Project (.pbip)](Retail_Commercial_Performance.pbip)
+
+Explore the Power BI project structure, including its report and semantic-model definitions. To open the project in Power BI Desktop, download the PBIP file together with its associated Report and SemanticModel folders.
 
 **Data refresh:** The four CSV source files are publicly hosted in the [`sales_data`](sales_data/) folder. Power BI retrieves them using `Web.Contents`. If prompted, select **Anonymous** authentication.
 
