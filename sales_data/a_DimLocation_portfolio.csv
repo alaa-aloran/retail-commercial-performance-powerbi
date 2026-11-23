@@ -1,0 +1,13 @@
+﻿LocationID,City,StateProvince,Country,MarketType,Latitude,Longitude
+L01,New York,New York,USA,Primary,40.7128,-74.006
+L02,Los Angeles,California,USA,Primary,34.0522,-118.2437
+L03,Chicago,Illinois,USA,Primary,41.8781,-87.6298
+L04,Houston,Texas,USA,Primary,29.7604,-95.3698
+L05,Seattle,Washington,USA,Primary,47.6062,-122.3321
+L06,Miami,Florida,USA,Primary,25.7617,-80.1918
+L07,Toronto,Ontario,Canada,Growth,43.6532,-79.3832
+L08,Vancouver,British Columbia,Canada,Growth,49.2827,-123.1207
+L09,Montreal,Quebec,Canada,Growth,45.5019,-73.5674
+L10,Mexico City,CDMX,Mexico,Growth,19.4326,-99.1332
+L11,Monterrey,Nuevo León,Mexico,Growth,25.6866,-100.3161
+L12,Guadalajara,Jalisco,Mexico,Growth,20.6597,-103.3496
