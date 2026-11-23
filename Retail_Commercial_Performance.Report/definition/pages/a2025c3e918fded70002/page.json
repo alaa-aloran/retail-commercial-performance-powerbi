@@ -1,0 +1,356 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "a2025c3e918fded70002",
+  "displayName": "Product & Channel Performance",
+  "displayOption": "FitToPage",
+  "height": 800,
+  "width": 1280,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F5F7FA'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff202500000005",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff202500000006",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff202500000007",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff202500000008",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000002",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff202500000005",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff202500000006",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff202500000007",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff202500000008",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000003",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff202500000005",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff202500000006",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff202500000007",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff202500000008",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000004",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000002",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000003",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000004",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000005",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000006",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000007",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff202500000008",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff202500000009",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000002",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000003",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000004",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000005",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000006",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000007",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000008",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000a",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000002",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000003",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000004",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000005",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000006",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000007",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000008",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000b",
+      "target": "ab2413ff20250000000c",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000002",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000003",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000004",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000005",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000006",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000007",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000008",
+      "type": "NoFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff202500000009",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff20250000000a",
+      "type": "DataFilter"
+    },
+    {
+      "source": "ab2413ff20250000000c",
+      "target": "ab2413ff20250000000b",
+      "type": "DataFilter"
+    }
+  ]
+}
